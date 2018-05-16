@@ -1,4 +1,7 @@
+#!/usr/bin/python3
 import csv
+import sys
+import argparse
 from io import BytesIO
 from reportlab.lib.pagesizes import letter, A5
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle, Frame
@@ -16,6 +19,7 @@ from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.lib.enums import TA_RIGHT
 
 from QRFlowable import QRFlowable
+
 
 class VoucherPrint:
 
@@ -149,11 +153,18 @@ class VoucherPrint:
 
 
 if __name__ == '__main__':
-    rollName = 'vouchers_tatdf_roll20'
+    parser = argparse.ArgumentParser(description='Generates vouchers.')
+    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
+                        default=sys.stdin)
+    parser.add_argument('outfile', nargs='?', type=argparse.FileType('wb'),
+                        default=sys.stdout)
+    args = parser.parse_args()
+
     vouchers = []
-    with open(rollName + '.csv', newline='') as rollFile:
+    with args.infile as rollFile:
         roll = csv.reader(rollFile, delimiter=';', quotechar='"')
-        vouchers = list(filter(lambda voucher: not voucher[0].startswith('#'), roll))
+        vouchers = list(
+            filter(lambda voucher: not voucher[0].startswith('#'), roll))
         vouchers = [voucher[0].strip() for voucher in vouchers]
 
     buffer = BytesIO()
@@ -162,5 +173,5 @@ if __name__ == '__main__':
     pdf = report.print_users()
     buffer.seek(0)
 
-    with open(rollName + '.pdf', 'wb') as f:
+    with args.outfile as f:
         f.write(buffer.read())
