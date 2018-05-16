@@ -15,6 +15,8 @@ from reportlab.lib.fonts import addMapping
 from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.lib.enums import TA_RIGHT
 
+from QRFlowable import QRFlowable
+
 class VoucherPrint:
 
     def __init__(self, buffer, vouchers):
@@ -29,12 +31,9 @@ class VoucherPrint:
         styles = getSampleStyleSheet()
         canvas.setFont("DejaVu Sans", 7)
 
-        # Header
-        # header = Paragraph('This is a multi-line header.  It goes on every page.   ' * 5, styles['Text'])
-
         im = Image('TaT_DF_LOGO.png')
         im._restrictSize(1000 * mm, 30 * mm)
-        im.drawOn(canvas, doc.leftMargin, doc.height - doc.topMargin)
+        im.drawOn(canvas, doc.leftMargin, doc.height - 20 * mm)
 
         # Footer
         canvas.drawRightString(doc.width + doc.rightMargin, 5 * mm,
@@ -54,7 +53,7 @@ class VoucherPrint:
         doc = SimpleDocTemplate(buffer,
                                 rightMargin=15 * mm,
                                 leftMargin=15 * mm,
-                                topMargin=10 * mm,
+                                topMargin=0 * mm,
                                 bottomMargin=15 * mm,
                                 pagesize=self.pagesize)
 
@@ -78,16 +77,8 @@ class VoucherPrint:
         ))
 
         for i, voucher in enumerate(vouchers):
-            # qr = QrCodeWidget(voucher)
-            # bounds = qr.getBounds()
-            # width = bounds[2] - bounds[0]
-            # height = bounds[3] - bounds[1]
-
-            elements.append(Spacer(0, 30 * mm))
-            # qrContainer = Drawing(
-            #     30 * mm, 30 * mm, transform=[30 * mm/width, 0, 0, 30 * mm/height, 0, 0])
-            # qrContainer.add(qr)
-            # elements.append(qrContainer)
+            qrcode = QRFlowable(voucher)
+            elements.append(qrcode)
 
             elements.append(Spacer(0, 5 * mm))
             table = Table([('Voucher Code', voucher)],
