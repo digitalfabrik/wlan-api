@@ -4,7 +4,6 @@ from reportlab.graphics import renderPDF
 from reportlab.graphics.shapes import Drawing
 from reportlab.lib.units import mm
 
-
 class QRFlowable(Flowable):
     def __init__(self, qr_value):
         Flowable.__init__(self)

@@ -1,22 +1,14 @@
-#!/usr/bin/python3
-import csv
-import sys
-import argparse
-from io import BytesIO
-from reportlab.lib.pagesizes import letter, A5
-from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle, Frame
+from reportlab.lib.pagesizes import A5
+from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
 from reportlab.graphics.shapes import Drawing
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.units import inch
 from reportlab.lib.colors import black
 from reportlab.pdfgen import canvas
-from reportlab.lib.units import mm, cm
+from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.fonts import addMapping
 from reportlab.graphics.barcode.qr import QrCodeWidget
-from reportlab.lib.enums import TA_RIGHT
 
 from QRFlowable import QRFlowable
 
@@ -29,13 +21,35 @@ class VoucherPrint:
         self.pagesize = A5
         self.width, self.height = self.pagesize
 
+        pdfmetrics.registerFont(
+            TTFont("DejaVu Sans", "assets/fonts/DejaVuSans.ttf"))
+        pdfmetrics.registerFont(
+            TTFont("DejaVu Sans Bold", "assets/fonts/DejaVuSans-Bold.ttf"))
+        addMapping('DejaVu Sans', 0, 0, 'DejaVu Sans')
+        addMapping('DejaVu Sans', 1, 0, 'DejaVu Sans Bold')
+
+        self.styles = getSampleStyleSheet()
+        self.styles.add(ParagraphStyle(
+            name='Text',
+            fontName='DejaVu Sans',
+            fontSize=8,
+        ))
+        self.styles.add(ListStyle(
+            'list_default',
+            bulletType='bullet',
+            start='circle',
+            leftIndent=10,
+            bulletOffsetY=0,
+            bulletFontSize=7
+        ))
+
     @staticmethod
     def _header_footer(canvas, doc):
         canvas.saveState()
         styles = getSampleStyleSheet()
         canvas.setFont("DejaVu Sans", 7)
 
-        im = Image('TaT_DF_LOGO.png')
+        im = Image('assets/images/TaT_DF_LOGO.png')
         im._restrictSize(1000 * mm, 30 * mm)
         im.drawOn(canvas, doc.leftMargin, doc.height - 20 * mm)
 
@@ -46,14 +60,23 @@ class VoucherPrint:
         # Release the canvas
         canvas.restoreState()
 
-    def print_users(self):
-        pdfmetrics.registerFont(TTFont("DejaVu Sans", "DejaVuSans.ttf"))
-        pdfmetrics.registerFont(
-            TTFont("DejaVu Sans Bold", "DejaVuSans-Bold.ttf"))
-        addMapping('DejaVu Sans', 0, 0, 'DejaVu Sans')
-        addMapping('DejaVu Sans', 1, 0, 'DejaVu Sans Bold')
+    def print_table(self, elements, voucher):
+        table = Table([('Voucher Code', voucher)],
+                      colWidths=55 * mm, rowHeights=10 * mm)
+        table.setStyle(TableStyle(
+            [
+                ('INNERGRID', (0, 0), (-1, -1), 0.5 * mm, black),
+                ('FONT', (0, 0), (-1, -1), 'DejaVu Sans Bold'),
+                ('BOX', (0, 0), (-1, -1), 0.5 * mm, black),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]
+        ))
+        elements.append(table)
 
+    def print_vouchers(self):
         buffer = self.buffer
+        styles = self.styles
+
         doc = SimpleDocTemplate(buffer,
                                 rightMargin=15 * mm,
                                 leftMargin=15 * mm,
@@ -64,38 +87,12 @@ class VoucherPrint:
         # Our container for 'Flowable' objects
         elements = []
 
-        # A large collection of style sheets pre-made for us
-        styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(
-            name='Text',
-            fontName='DejaVu Sans',
-            fontSize=8,
-        ))
-        styles.add(ListStyle(
-            'list_default',
-            bulletType='bullet',
-            start='circle',
-            leftIndent=10,
-            bulletOffsetY=0,
-            bulletFontSize=7
-        ))
-
-        for i, voucher in enumerate(vouchers):
+        for i, voucher in enumerate(self.vouchers):
             qrcode = QRFlowable(voucher)
             elements.append(qrcode)
 
             elements.append(Spacer(0, 5 * mm))
-            table = Table([('Voucher Code', voucher)],
-                          colWidths=55 * mm, rowHeights=10 * mm)
-            table.setStyle(TableStyle(
-                [
-                    ('INNERGRID', (0, 0), (-1, -1), 0.5 * mm, black),
-                    ('FONT', (0, 0), (-1, -1), 'DejaVu Sans Bold'),
-                    ('BOX', (0, 0), (-1, -1), 0.5 * mm, black),
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ]
-            ))
-            elements.append(table)
+            self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
             elements.append(ListFlowable(
@@ -113,7 +110,7 @@ class VoucherPrint:
             ))
 
             elements.append(Spacer(0, 2 * mm))
-            im = Image('example.png')
+            im = Image('assets/images/example.png')
             im._restrictSize(50 * mm, 50 * mm)
             elements.append(im)
             elements.append(Spacer(0, 2 * mm))
@@ -150,28 +147,3 @@ class VoucherPrint:
 
         doc.build(elements, onFirstPage=self._header_footer,
                   onLaterPages=self._header_footer)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generates vouchers.')
-    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
-                        default=sys.stdin)
-    parser.add_argument('outfile', nargs='?', type=argparse.FileType('wb'),
-                        default=sys.stdout)
-    args = parser.parse_args()
-
-    vouchers = []
-    with args.infile as rollFile:
-        roll = csv.reader(rollFile, delimiter=';', quotechar='"')
-        vouchers = list(
-            filter(lambda voucher: not voucher[0].startswith('#'), roll))
-        vouchers = [voucher[0].strip() for voucher in vouchers]
-
-    buffer = BytesIO()
-
-    report = VoucherPrint(buffer, vouchers)
-    pdf = report.print_users()
-    buffer.seek(0)
-
-    with args.outfile as f:
-        f.write(buffer.read())
