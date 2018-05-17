@@ -88,7 +88,7 @@ class VoucherPrint:
         elements = []
 
         for i, voucher in enumerate(self.vouchers):
-            qrcode = QRFlowable(voucher)
+            qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org:9000/index.php?zone=tatdf&voucher=' + voucher)
             elements.append(qrcode)
 
             elements.append(Spacer(0, 5 * mm))
