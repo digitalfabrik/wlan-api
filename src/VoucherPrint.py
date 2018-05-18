@@ -9,6 +9,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.fonts import addMapping
 from reportlab.graphics.barcode.qr import QrCodeWidget
+from reportlab.lib.enums import TA_RIGHT
 
 from QRFlowable import QRFlowable
 
@@ -33,6 +34,12 @@ class VoucherPrint:
             name='Text',
             fontName='DejaVu Sans',
             fontSize=8,
+        ))
+        self.styles.add(ParagraphStyle(
+            name='Voucher_Subtitle',
+            fontName='DejaVu Sans',
+            fontSize=5,
+            alignment=TA_RIGHT
         ))
         self.styles.add(ListStyle(
             'list_default',
@@ -88,10 +95,12 @@ class VoucherPrint:
         elements = []
 
         for i, voucher in enumerate(self.vouchers):
-            qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org:9000/index.php?zone=tatdf&voucher=' + voucher)
+            qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org:9000/?voucher=' + voucher)
             elements.append(qrcode)
 
-            elements.append(Spacer(0, 5 * mm))
+            elements.append(Paragraph('1. Scannen  2. Alzeptieren  3. Du bist eingeloggt!', styles['Voucher_Subtitle']))
+
+            elements.append(Spacer(0, 1 * mm))
             self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
