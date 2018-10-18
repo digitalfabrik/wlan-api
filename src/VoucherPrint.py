@@ -98,7 +98,7 @@ class VoucherPrint:
             qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org/?voucher=' + voucher)
             elements.append(qrcode)
 
-            elements.append(Paragraph('1. Scannen  2. Akzeptieren  3. Du bist eingeloggt!', styles['Voucher_Subtitle']))
+            elements.append(Paragraph('1. Deaktiviere deine mobilen Daten  2. Scannen  3. Du wirst eingeloggt!', styles['Voucher_Subtitle']))
 
             elements.append(Spacer(0, 1 * mm))
             self.print_table(elements, voucher)
