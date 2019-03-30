@@ -61,7 +61,7 @@ class VoucherPrint:
         im.drawOn(canvas, doc.leftMargin, doc.height - 20 * mm)
 
         # Footer
-        canvas.drawRightString(doc.width + doc.rightMargin, 5 * mm,
+        canvas.drawRightString(doc.width + doc.rightMargin, 10 * mm,
                                'Falls Probleme auftreten, schreiben Sie eine E-Mail an wifi@tuerantuer.de')
 
         # Release the canvas
