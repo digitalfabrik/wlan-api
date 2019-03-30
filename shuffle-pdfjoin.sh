@@ -1,7 +1,7 @@
 #!/bin/bash
-VOUCHER_PDF=vouchers_tatdf_roll24.csv-2x2.pdf
+VOUCHER_PDF=$1
 VOUCHER_PDF_PAGES=50
-ADS_PDF=ads-2x2.pdf
+ADS_PDF=$2
 ADS_PDF_PAGES=1
 
 PAGES=()
