@@ -3,4 +3,5 @@ vouchers_*.pdf
 rolls/
 *.pyc
 shuffled.pdf
+*.sql
 
