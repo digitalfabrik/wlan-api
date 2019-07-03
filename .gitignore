@@ -5,3 +5,8 @@ rolls/
 shuffled.pdf
 *.sql
 
+*.key
+*.pem
+*.pub
+*.cfg
+
