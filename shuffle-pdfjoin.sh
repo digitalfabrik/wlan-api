@@ -17,4 +17,4 @@ for k in $(seq 1 ${VOUCHER_PDF_PAGES}); do
     fi
 done
 
-pdfjoin ${PAGES[@]} --outfile shuffled.pdf --paper a5paper --rotateoversize false
+pdfjoin ${PAGES[@]} --outfile print-me.pdf --paper a5paper --rotateoversize false
