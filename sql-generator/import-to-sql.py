@@ -11,6 +11,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("voucher_csv")
+parser.add_argument("output_sql")
 args = parser.parse_args()
 
 def read_imports(path):
@@ -22,7 +23,7 @@ def read_imports(path):
     return voucher_imports
 
 voucher_imports = read_imports(args.voucher_csv)
-with open("voucher.sql", "w") as text_file:
+with open(args.output_sql, "w") as text_file:
     for row in voucher_imports:
         voucher = row[0].strip()
         if voucher.startswith('#'):
