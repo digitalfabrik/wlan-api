@@ -3,7 +3,7 @@ import csv
 import sys
 import argparse
 from io import BytesIO
-from VoucherPrint import VoucherPrint
+from vpg.VoucherPrint import VoucherPrint
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generates vouchers.')

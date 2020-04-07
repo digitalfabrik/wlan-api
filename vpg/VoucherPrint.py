@@ -11,7 +11,7 @@ from reportlab.lib.fonts import addMapping
 from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.lib.enums import TA_RIGHT
 
-from QRFlowable import QRFlowable
+from vpg.QRFlowable import QRFlowable
 
 
 class VoucherPrint:
