@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Step</title>
+</head>
+<body>
+
+<form action="/pdf/generate" method="POST">
+    <input name="roll" value="{{ roll }}" type="hidden">
+    <input name="count" value="{{ count }}" type="hidden">
+    <div>
+        <button>Download Voucher PDF</button>
+    </div>
+</form>
+
+<form action="/activation/step" method="POST">
+    <input name="roll" value="{{ roll }}" type="hidden">
+    <input name="count" value="{{ count }}" type="hidden">
+    <div>
+        <button>Activate</button>
+    </div>
+</form>
+</body>
+</html>
