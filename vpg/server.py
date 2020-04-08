@@ -8,11 +8,17 @@ import subprocess
 import mysql.connector
 from mysql.connector import errorcode
 
-VOUCHER_PRIVATE_KEY = './sql-generator/key.pem'
-VOUCHER_CFG = './sql-generator/voucher.cfg'
-VOUCHER_BIN = './sql-generator/voucher'
+VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
+VOUCHER_CFG = os.environ['VOUCHER_CFG']
+VOUCHER_BIN = os.environ['VOUCHER_BIN']
 
-app = Flask(__name__)
+
+def create_app():
+    app = Flask(__name__)
+    return app
+
+
+app = create_app()
 
 
 @app.route('/', methods=['GET'])
