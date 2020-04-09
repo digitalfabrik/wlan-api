@@ -13,12 +13,11 @@ VOUCHER_CFG = os.environ['VOUCHER_CFG']
 VOUCHER_BIN = os.environ['VOUCHER_BIN']
 
 
+app = Flask(__name__)
+
+
 def create_app():
-    app = Flask(__name__)
     return app
-
-
-app = create_app()
 
 
 @app.route('/', methods=['GET'])
