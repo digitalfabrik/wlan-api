@@ -12,7 +12,6 @@ VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
 VOUCHER_CFG = os.environ['VOUCHER_CFG']
 VOUCHER_BIN = os.environ['VOUCHER_BIN']
 
-
 app = Flask(__name__)
 
 
@@ -74,6 +73,7 @@ def activate_step():
             host=os.environ.get("MYSQL_HOST"),
             user=os.environ.get("MYSQL_USER"),
             passwd=os.environ.get("MYSQL_PASSWORD"),
+            option_files=[os.environ.get("MYSQL_OPTION_FILE")],
             database="radius"
         )
         connection.autocommit = False
@@ -110,7 +110,7 @@ def activate_step():
         else:
             message = "Something went wrong"
     finally:
-        if connection.is_connected():
+        if connection != None and connection.is_connected():
             connection.close()
             cursor.close()
 
