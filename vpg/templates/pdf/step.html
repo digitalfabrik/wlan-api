@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>ads_pdf
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,10 @@
 <form action="/pdf/generate" method="POST" enctype="multipart/form-data">
     <input name="roll" value="{{ roll }}" type="hidden">
     <input name="count" value="{{ count }}" type="hidden">
-    <input type="file" name="ads_pdf" accept="application/pdf">
+    <div>
+        <label for="ads_pdf">Which ads should be shuffled in? Format is A4</label>
+        <input id="ads_pdf" type="file" name="ads_pdf" accept="application/pdf">
+    </div>
     <div>
         <button>Download Voucher PDF</button>
     </div>
