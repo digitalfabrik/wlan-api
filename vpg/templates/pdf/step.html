@@ -6,9 +6,10 @@
 </head>
 <body>
 
-<form action="/pdf/generate" method="POST">
+<form action="/pdf/generate" method="POST" enctype="multipart/form-data">
     <input name="roll" value="{{ roll }}" type="hidden">
     <input name="count" value="{{ count }}" type="hidden">
+    <input type="file" name="ads_pdf" accept="application/pdf">
     <div>
         <button>Download Voucher PDF</button>
     </div>

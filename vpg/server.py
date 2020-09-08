@@ -1,13 +1,14 @@
 import csv
 import os
 
-from flask import Flask, request, send_file, render_template
+from flask import Flask, request, send_file, render_template, flash, redirect
 from io import BytesIO, StringIO
 from vpg.VoucherPrint import VoucherPrint
 import subprocess
 import mysql.connector
 from mysql.connector import errorcode
 import tempfile
+import itertools
 
 VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
 VOUCHER_CFG = os.environ['VOUCHER_CFG']
@@ -48,6 +49,11 @@ def generate_vouchers(roll, count):
 def pdf_generate():
     roll = int(request.form['roll'])
     count = int(request.form['count'])
+    ads_file = request.files['ads_pdf']
+
+    if ads_file.filename == '':
+        return 'bad request!', 400
+
     vouchers = generate_vouchers(roll, count)
 
     voucher_buffer = BytesIO()
@@ -56,18 +62,29 @@ def pdf_generate():
     report.print_vouchers()
     voucher_buffer.seek(0)
 
+    with tempfile.NamedTemporaryFile(mode='wb', delete=True, suffix=".pdf") as ads_file_output:
+        ads_file.save(ads_file_output)
+        # ads_file_output.close()
 
-    with tempfile.NamedTemporaryFile(mode = 'wb', delete = False, suffix = ".pdf") as output:
-        process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--suffix", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
-                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
-        output.write(stdoutdata)
+        with tempfile.NamedTemporaryFile(mode='wb', delete=True, suffix=".pdf") as output:
+            process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
+            output.write(stdoutdata)
+            # output.close()
 
-        print(output.name)
+            voucher_pages = int(len(vouchers) / 4)  # Because of 2x2 nup
+            page_with_ads = 1
 
-        process = subprocess.Popen(["/home/max/projects/digitalfabrik/voucher-pdf-generator/shuffle-pdfjoin.sh", "/home/max/projects/digitalfabrik/voucher-pdf-generator/ads/Voucherwerbung_1.3-2x2.pdf", output.name, str(len(vouchers) / 4)], shell=False,
-                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        stdoutdata, stderrdata = process.communicate(input=stdoutdata)
+            pdfjam_pages = [
+                [output.name, str(i + 1), ads_file_output.name,
+                 str(page_with_ads)] for i in range(voucher_pages)]
+
+            process = subprocess.Popen(
+                ["/usr/bin/pdfjam", *list(itertools.chain(*pdfjam_pages)), "--outfile", "/dev/stdout", "--paper", "a4paper", "--rotateoversize",
+                 "false"],
+                shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            stdoutdata, stderrdata = process.communicate(input=stdoutdata)
 
     return send_file(BytesIO(stdoutdata),
                      mimetype='application/pdf',
