@@ -5,9 +5,16 @@
     <title>Activation Step</title>
 </head>
 <body>
-<div>
-    {{ message }}
-</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
 
 <div>
     Please post to the Slack channel #wlan-infrastructure which roll and how many vouchers were generated.

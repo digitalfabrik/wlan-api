@@ -1,7 +1,7 @@
 import csv
 import os
 
-from flask import Flask, request, send_file, render_template, flash, redirect
+from flask import Flask, request, send_file, render_template, flash, redirect, url_for
 from io import BytesIO, StringIO
 from vpg.VoucherPrint import VoucherPrint
 import subprocess
@@ -13,8 +13,10 @@ import itertools
 VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
 VOUCHER_CFG = os.environ['VOUCHER_CFG']
 VOUCHER_BIN = os.environ['VOUCHER_BIN']
+FLASK_SECRET = os.environ['FLASK_SECRET']
 
 app = Flask(__name__)
+app.secret_key = FLASK_SECRET
 
 
 def create_app():
@@ -45,6 +47,47 @@ def generate_vouchers(roll, count):
     return vouchers
 
 
+def generate_buffer_pdf(roll, count):
+    vouchers = generate_vouchers(roll, count)
+
+    voucher_buffer = BytesIO()
+    report = VoucherPrint(voucher_buffer, vouchers)
+    report.print_vouchers()
+    voucher_buffer.seek(0)
+    return voucher_buffer, len(vouchers)
+
+
+def buffer_pdf_to_2x2(voucher_buffer):
+    process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
+
+    if stderrdata is not None:
+        return None, None
+
+    return stdoutdata
+
+
+def shuffle_ads(ads_file_path, voucher_pdf_path, voucher_pdf_pages):
+    page_with_ads = 1
+
+    pdfjam_pages = [
+        [voucher_pdf_path, str(i + 1), ads_file_path,
+         str(page_with_ads)] for i in range(voucher_pdf_pages)]
+
+    process = subprocess.Popen(
+        ["/usr/bin/pdfjam", *list(itertools.chain(*pdfjam_pages)), "--outfile", "/dev/stdout", "--paper", "a4paper",
+         "--rotateoversize",
+         "false"],
+        shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdoutdata, stderrdata = process.communicate()
+
+    if stderrdata is not None:
+        return None
+
+    return stdoutdata
+
+
 @app.route('/pdf/generate', methods=['POST'])
 def pdf_generate():
     roll = int(request.form['roll'])
@@ -52,52 +95,66 @@ def pdf_generate():
     ads_file = request.files['ads_pdf']
 
     if ads_file.filename == '':
-        return 'bad request!', 400
+        flash("Error: Please provide an Ads file!")
+        return redirect(url_for('home'))
 
-    vouchers = generate_vouchers(roll, count)
+    voucher_buffer, voucher_count = generate_buffer_pdf(roll, count)
 
-    voucher_buffer = BytesIO()
-
-    report = VoucherPrint(voucher_buffer, vouchers)
-    report.print_vouchers()
-    voucher_buffer.seek(0)
+    if voucher_buffer is None:
+        flash("Error: Failed to generate 2x2 pdf!")
+        return redirect(url_for('home'))
 
     with tempfile.NamedTemporaryFile(mode='wb', delete=True, suffix=".pdf") as ads_file_output:
         ads_file.save(ads_file_output)
-        # ads_file_output.close()
+        ads_file_output.flush()
 
         with tempfile.NamedTemporaryFile(mode='wb', delete=True, suffix=".pdf") as output:
-            process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
-                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
-            output.write(stdoutdata)
-            # output.close()
+            output.write(buffer_pdf_to_2x2(voucher_buffer))
+            output.flush()
 
-            voucher_pages = int(len(vouchers) / 4)  # Because of 2x2 nup
-            page_with_ads = 1
+            final_pdf = shuffle_ads(ads_file_output.name, output.name, int(voucher_count / 4))  # /4 Because of 2x2 nup
 
-            pdfjam_pages = [
-                [output.name, str(i + 1), ads_file_output.name,
-                 str(page_with_ads)] for i in range(voucher_pages)]
+            if final_pdf is None:
+                flash("Error: Failed to shuffle ads!")
+                return redirect(url_for('home'))
 
-            process = subprocess.Popen(
-                ["/usr/bin/pdfjam", *list(itertools.chain(*pdfjam_pages)), "--outfile", "/dev/stdout", "--paper", "a4paper", "--rotateoversize",
-                 "false"],
-                shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            stdoutdata, stderrdata = process.communicate(input=stdoutdata)
+            return send_file(BytesIO(final_pdf),
+                             mimetype='application/pdf',
+                             as_attachment=True,
+                             attachment_filename="vouchers_tatdf_roll%s.csv.pdf" % roll)
 
-    return send_file(BytesIO(stdoutdata),
-                     mimetype='application/pdf',
-                     as_attachment=True,
-                     attachment_filename="vouchers_tatdf_roll%s.csv.pdf" % roll)
+
+def activate_vouchers(cursor, vouchers):
+    for voucher in vouchers:
+        cursor.execute(
+            "SELECT username FROM radcheck WHERE radcheck.username = %s;",
+            (voucher,)
+        )
+
+        if len(cursor.fetchall()) == 0:
+            cursor.execute(
+                "INSERT INTO radcheck (username, attribute, op, value) VALUES (%s,'Max-All-Session',':=', %s);",
+                (voucher, str(36 * 24 * 60 * 60))
+            )
+
+            cursor.execute(
+                "INSERT INTO radcheck (username, attribute, op, value) VALUES (%s,'Cleartext-Password', ':=', 'dummy');",
+                (voucher,)
+            )
+        else:
+            return False
+
+    return True
 
 
 @app.route('/activation/step', methods=['POST'])
 def activate_step():
-    message = "Successfully activated vouchers"
     roll = int(request.form['roll'])
     count = int(request.form['count'])
     vouchers = generate_vouchers(roll, count)
+
+    connection = None
+    cursor = None
 
     try:
         connection = mysql.connector.connect(
@@ -108,41 +165,27 @@ def activate_step():
             database="radius"
         )
         connection.autocommit = False
-
         cursor = connection.cursor()
 
-        for voucher in vouchers:
-            cursor.execute(
-                "SELECT username FROM radcheck WHERE radcheck.username = %s;",
-                (voucher,)
-            )
+        if activate_vouchers(cursor, vouchers):
+            connection.commit()
+            flash("Successfully activated vouchers")
+        else:
+            flash("Error: Voucher already existed. Aborting!")
+            connection.rollback()
 
-            if len(cursor.fetchall()) == 0:
-                cursor.execute(
-                    "INSERT INTO radcheck (username, attribute, op, value) VALUES (%s,'Max-All-Session',':=', %s);",
-                    (voucher, str(36 * 24 * 60 * 60))
-                )
-
-                cursor.execute(
-                    "INSERT INTO radcheck (username, attribute, op, value) VALUES (%s,'Cleartext-Password', ':=', 'dummy');",
-                    (voucher,)
-                )
-
-                print("Activating voucher\t%s" % voucher)
-            else:
-                print("Skipping voucher\t%s" % voucher)
-
-        connection.commit()
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            message = "Something is wrong with your user name or password"
+            flash("Something is wrong with the database user name or password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            message = "Database does not exist"
+            flash("Database does not exist")
         else:
-            message = "Something went wrong"
+            flash("Something went wrong")
     finally:
-        if connection != None and connection.is_connected():
+        if connection is not None and connection.is_connected():
             connection.close()
-            cursor.close()
 
-    return render_template('activation/step.html', message=message)
+            if cursor is not None:
+                cursor.close()
+
+    return render_template('activation/step.html')
