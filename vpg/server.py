@@ -7,6 +7,7 @@ from vpg.VoucherPrint import VoucherPrint
 import subprocess
 import mysql.connector
 from mysql.connector import errorcode
+import tempfile
 
 VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
 VOUCHER_CFG = os.environ['VOUCHER_CFG']
@@ -49,13 +50,26 @@ def pdf_generate():
     count = int(request.form['count'])
     vouchers = generate_vouchers(roll, count)
 
-    buffer = BytesIO()
+    voucher_buffer = BytesIO()
 
-    report = VoucherPrint(buffer, vouchers)
+    report = VoucherPrint(voucher_buffer, vouchers)
     report.print_vouchers()
-    buffer.seek(0)
+    voucher_buffer.seek(0)
 
-    return send_file(buffer,
+
+    with tempfile.NamedTemporaryFile(mode = 'wb', delete = False, suffix = ".pdf") as output:
+        process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--suffix", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
+        output.write(stdoutdata)
+
+        print(output.name)
+
+        process = subprocess.Popen(["/home/max/projects/digitalfabrik/voucher-pdf-generator/shuffle-pdfjoin.sh", "/home/max/projects/digitalfabrik/voucher-pdf-generator/ads/Voucherwerbung_1.3-2x2.pdf", output.name, str(len(vouchers) / 4)], shell=False,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdoutdata, stderrdata = process.communicate(input=stdoutdata)
+
+    return send_file(BytesIO(stdoutdata),
                      mimetype='application/pdf',
                      as_attachment=True,
                      attachment_filename="vouchers_tatdf_roll%s.csv.pdf" % roll)
