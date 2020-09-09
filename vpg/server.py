@@ -10,6 +10,8 @@ from mysql.connector import errorcode
 import tempfile
 import itertools
 
+PDFJAM_BIN = "/usr/bin/pdfjam"
+
 VOUCHER_PRIVATE_KEY = os.environ['VOUCHER_PRIVATE_KEY']
 VOUCHER_CFG = os.environ['VOUCHER_CFG']
 VOUCHER_BIN = os.environ['VOUCHER_BIN']
@@ -58,7 +60,7 @@ def generate_buffer_pdf(roll, count):
 
 
 def buffer_pdf_to_2x2(voucher_buffer):
-    process = subprocess.Popen(["/usr/bin/pdfjam", "--nup", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
+    process = subprocess.Popen([PDFJAM_BIN, "--nup", "2x2", "--outfile", "/dev/stdout", "--"], shell=False,
                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdoutdata, stderrdata = process.communicate(input=voucher_buffer.getvalue())
 
@@ -76,7 +78,7 @@ def shuffle_ads(ads_file_path, voucher_pdf_path, voucher_pdf_pages):
          str(page_with_ads)] for i in range(voucher_pdf_pages)]
 
     process = subprocess.Popen(
-        ["/usr/bin/pdfjam", *list(itertools.chain(*pdfjam_pages)), "--outfile", "/dev/stdout", "--paper", "a4paper",
+        [PDFJAM_BIN, *list(itertools.chain(*pdfjam_pages)), "--outfile", "/dev/stdout", "--paper", "a4paper",
          "--rotateoversize",
          "false"],
         shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

@@ -1,23 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Activation Step</title>
-</head>
-<body>
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class=flashes>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-
-<div>
+{% extends 'base.html' %}
+{% block content %}
+<h1>Activation</h1>
+<div class="section">
     Please post to the Slack channel #wlan-infrastructure which roll and how many vouchers were generated.
 </div>
-</body>
-</html>
+{% endblock %}

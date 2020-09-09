@@ -1,32 +1,40 @@
-<!DOCTYPE html>ads_pdf
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PDF Step</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<form action="/pdf/generate" method="POST" enctype="multipart/form-data">
-    <input name="roll" value="{{ roll }}" type="hidden">
-    <input name="count" value="{{ count }}" type="hidden">
-    <div>
-        <label for="ads_pdf">Which ads should be shuffled in? Format is A4</label>
-        <input id="ads_pdf" type="file" name="ads_pdf" accept="application/pdf">
-    </div>
-    <div>
-        <button>Download Voucher PDF</button>
-    </div>
-    <div>
-        Please upload the PDF to the Google Drive!
-    </div>
-</form>
+{% block content %}
 
-<form action="/activation/step" method="POST">
-    <input name="roll" value="{{ roll }}" type="hidden">
-    <input name="count" value="{{ count }}" type="hidden">
+<h1>
+    Download PDF
+</h1>
+<div class="section">
     <div>
-        <button>Activate</button>
+        Please upload the PDF to the Google Drive! The download starts after about 20 seconds.
     </div>
-</form>
-</body>
-</html>
+
+    <form action="/pdf/generate" method="POST" enctype="multipart/form-data">
+        <input name="roll" value="{{ roll }}" type="hidden">
+        <input name="count" value="{{ count }}" type="hidden">
+        <div>
+            <label for="ads_pdf">Advertisement PDF in A4</label>
+            <input id="ads_pdf" type="file" name="ads_pdf" accept="application/pdf">
+        </div>
+        <div>
+            <input type="submit" value="Download PDF">
+        </div>
+    </form>
+</div>
+
+<h2>Activation</h2>
+<div class="section">
+    <form action="/activation/step" method="POST">
+        <div>
+            <input name="roll" value="{{ roll }}" type="hidden">
+        </div>
+        <div>
+            <input name="count" value="{{ count }}" type="hidden">
+        </div>
+        <div>
+            <input type="submit" value="Activate in database">
+        </div>
+    </form>
+</div>
+{% endblock %}
