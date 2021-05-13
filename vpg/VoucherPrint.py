@@ -95,12 +95,12 @@ class VoucherPrint:
         elements = []
 
         for i, voucher in enumerate(self.vouchers):
-            qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org/?voucher=' + voucher)
-            elements.append(qrcode)
+            #qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org/?voucher=' + voucher)
+            #elements.append(qrcode)
 
-            elements.append(Paragraph('1. Deaktiviere deine mobilen Daten  2. Scannen  3. Du wirst eingeloggt!', styles['Voucher_Subtitle']))
+            #elements.append(Paragraph('1. Deaktiviere deine mobilen Daten  2. Scannen  3. Du wirst eingeloggt!', styles['Voucher_Subtitle']))
 
-            elements.append(Spacer(0, 1 * mm))
+            elements.append(Spacer(0, 40 * mm))
             self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
