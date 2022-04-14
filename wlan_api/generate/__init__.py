@@ -8,7 +8,8 @@ VOUCHER_CFG = os.environ['VOUCHER_CFG']
 VOUCHER_BIN = os.environ['VOUCHER_BIN']
 
 
-def generate_code():
+def generate_vouchers(roll, count):
+    # WRONG CODE BELOW
     voucher = bytearray(os.urandom(13))
 
     alphabet = "2345678ABCDEFGHKLMNPQRSTUVWXYZ"
