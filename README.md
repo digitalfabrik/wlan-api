@@ -1,4 +1,4 @@
-# VPG
+# wlan-api
 
 ## Running
 
@@ -9,7 +9,7 @@ pip install .
 # Prepare config
 export VOUCHER_PRIVATE_KEY=sql-generator/key.pem VOUCHER_CFG=sql-generator/voucher.cfg VOUCHER_BIN=sql-generator/voucher FLASK_SECRET=asdf
 
-FLASK_APP=vpg.server flask run
+FLASK_APP=wlan_api.server flask run
 ```
 
 ## Upgrading

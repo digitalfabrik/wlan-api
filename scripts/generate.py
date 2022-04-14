@@ -3,7 +3,7 @@ import csv
 import sys
 import argparse
 from io import BytesIO
-from vpg.VoucherPrint import VoucherPrint
+from wlan_api.generate import VoucherPrint
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generates vouchers.')

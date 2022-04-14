@@ -1,17 +1,12 @@
 from reportlab.lib.pagesizes import A5
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
-from reportlab.graphics.shapes import Drawing
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import black
-from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.fonts import addMapping
-from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.lib.enums import TA_RIGHT
-
-from vpg.QRFlowable import QRFlowable
 
 
 class VoucherPrint:
