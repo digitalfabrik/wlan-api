@@ -1,13 +1,45 @@
-from flask import Blueprint, render_template, abort
-from jinja2 import TemplateNotFound
+from flask import Blueprint, jsonify, make_response, request
 
-simple_page = Blueprint('shop', __name__,
-                        template_folder='templates')
+from wlan_api.generate import generate_vouchers_pfsense
 
-@simple_page.route('/', defaults={'page': 'index'})
-@simple_page.route('/<page>')
-def show(page):
-    try:
-        return render_template('pages/%s.html' % page)
-    except TemplateNotFound:
-        abort(404)
+shop = Blueprint('shop', __name__)
+
+# https://pythonise.com/series/learning-flask/working-with-json-in-flask
+
+
+@shop.route('/', methods=["GET"])
+def example():
+    return jsonify({"message": "Request body must be JSON"}), 405
+
+
+@shop.route('/getvoucher', methods=["GET"])
+def example1():
+    return make_response(jsonify({"message": "Request body must be JSON"}), 405)
+
+
+@shop.route("/json", methods=["POST"])
+def example2():
+    if request.is_json:
+        req = request.get_json()
+
+        response_body = {
+            "message": "JSON received!",
+            "sender": req.get("name")
+        }
+
+        res = make_response(jsonify(response_body), 200)
+
+        return res
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 405)
+
+
+@shop.route("/vouchers", methods=["POST"])
+def vouchers():
+    if request.is_json:
+        vouchers = generate_vouchers_pfsense(10, 100)
+        res = make_response(jsonify(vouchers), 200)
+
+        return res
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 405)
