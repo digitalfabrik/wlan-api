@@ -3,7 +3,7 @@ from flask import request, send_file, render_template, flash, redirect, url_for
 from io import BytesIO
 
 from wlan_api.activation import insert_vouchers_into_database
-from wlan_api.generate import generate_vouchers_pfsense
+from wlan_api.generate import generate_vouchers
 from wlan_api.pdf import VoucherPrint
 
 from wlan_api.pdf.pdfjam import merge_final_pdf
@@ -39,9 +39,9 @@ def pdf_generate():
 
     if ads_file.filename == '':
         flash("Error: Please provide an Ads file!")
-        return redirect(url_for('home'))
+        return redirect(url_for('vpg.home'))
 
-    vouchers = generate_vouchers_pfsense(roll, count)
+    vouchers = generate_vouchers(roll, count)
     voucher_buffer, voucher_count = create_pdf_buffer(vouchers)
 
     if voucher_buffer is None:
@@ -64,7 +64,7 @@ def pdf_generate():
 def activate_step():
     roll = int(request.form['roll'])
     count = int(request.form['count'])
-    vouchers = generate_vouchers_pfsense(roll, count)
+    vouchers = generate_vouchers(roll, count)
 
     flash(insert_vouchers_into_database(vouchers))
 
