@@ -99,6 +99,11 @@ class VoucherPrint:
             self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
+            elements.append(Paragraph('''
+                <b>Dieser Voucher ist nach der ersten Aktivierung 36 Tage gültig</b>
+            ''', styles["Text"]))
+
+            elements.append(Spacer(0, 5 * mm))
             elements.append(ListFlowable(
                 [
                     ListItem(Paragraph(
@@ -106,21 +111,7 @@ class VoucherPrint:
                     ListItem(Paragraph(
                         'Öffnen Sie ihren Webbrowser (Firefox, Chrome, Internet Explorer...)', styles['Text']), value='circle'),
                     ListItem(
-                        Paragraph('Öffnen Sie eine beliebige Website', styles['Text']), value='circle'),
-                    ListItem(
-                        Paragraph('Die folgende Seite wird angezeigt:', styles['Text']), value='circle')
-                ],
-                style=styles['list_default']
-            ))
-
-            elements.append(Spacer(0, 2 * mm))
-            im = Image('assets/images/example.png')
-            im._restrictSize(50 * mm, 50 * mm)
-            elements.append(im)
-            elements.append(Spacer(0, 2 * mm))
-
-            elements.append(ListFlowable(
-                [
+                        Paragraph('Öffnen Sie eine beliebige Website', styles['Text']), value='circle'), 
                     ListItem(Paragraph(
                         'Geben Sie ihren persönlichen Voucher Code ein (Groß-/Kleinschreibung ist wichtig)', styles['Text']), value='circle'),
                     ListItem(Paragraph('Klicken Sie auf "Submit"',
@@ -134,7 +125,7 @@ class VoucherPrint:
             elements.append(Spacer(0, 10 * mm))
             elements.append(Paragraph('''
                 <b>Geben Sie den Voucher Code nicht weiter! Sie können das Internet 
-                nicht mehr normal Nutzen, falls jemand anderes Ihren Voucher Code kennt!</b>
+                nicht mehr normal nutzen, falls jemand anderes Ihren Voucher Code kennt!</b>
             ''', styles["Text"]))
             elements.append(Spacer(0,  5 * mm))
             elements.append(Paragraph('''
