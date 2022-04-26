@@ -51,7 +51,7 @@ class VoucherPrint:
         styles = getSampleStyleSheet()
         canvas.setFont("DejaVu Sans", 7)
 
-        im = Image('assets/images/TaT_DF_LOGO.png')
+        im = Image('assets/images/TaT_DF_LOGO.jpeg')
         im._restrictSize(1000 * mm, 30 * mm)
         im.drawOn(canvas, doc.leftMargin, doc.height - 20 * mm)
 
