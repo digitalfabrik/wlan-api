@@ -10,7 +10,7 @@
         Please upload the PDF to the Google Drive! The download starts after about 20 seconds.
     </div>
 
-    <form action="/pdf/generate" method="POST" enctype="multipart/form-data">
+    <form action="/vpg/pdf/generate" method="POST" enctype="multipart/form-data">
         <input name="roll" value="{{ roll }}" type="hidden">
         <input name="count" value="{{ count }}" type="hidden">
         <div>
@@ -25,7 +25,7 @@
 
 <h2>Activation</h2>
 <div class="section">
-    <form action="/activation/step" method="POST">
+    <form action="/vpg/activation/step" method="POST">
         <div>
             <input name="roll" value="{{ roll }}" type="hidden">
         </div>
