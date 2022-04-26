@@ -1,0 +1,13 @@
+SECRET_KEY: "test"
+
+VOUCHER:
+  alphabet: "2345678ABCDEFGHKLMNPQRSTUVWXYZ"
+  length: 13
+  # Generated using base64.b64encode(os.urandom(64))
+  key: 3gHCRDygJaIcRF5GCJa+6phVq5Kl9R4qvFZaTBaNGODtVxWVDlVAeK+wbgY91Yk6g6H+HFXBklbKflUwUml1mw==
+
+MYSQL:
+  host: "localhost"
+  user: "user"
+  password: "password"
+  option-file: null

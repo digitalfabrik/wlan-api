@@ -1,16 +1,13 @@
-import os
-
 import mysql
 from mysql.connector import errorcode
 
 
-MYSQL_HOST = os.environ['MYSQL_HOST']
-MYSQL_USER = os.environ['MYSQL_USER']
-MYSQL_PASSWORD = os.environ['MYSQL_PASSWORD']
-MYSQL_OPTION_FILE = os.environ.get('MYSQL_OPTION_FILE')
+def insert_vouchers_into_database(vouchers, mysql_config):
+    host = mysql_config['host']
+    user = mysql_config['user']
+    password = mysql_config['password']
+    optionfile = mysql_config.get('option-file')
 
-
-def insert_vouchers_into_database(vouchers):
     message = None
     connection = None
     cursor = None
@@ -18,13 +15,13 @@ def insert_vouchers_into_database(vouchers):
     try:
         additional_args = {}
 
-        if MYSQL_OPTION_FILE is not None:
-            additional_args['option_files'] = MYSQL_OPTION_FILE
+        if optionfile is not None:
+            additional_args['option_files'] = optionfile
 
         connection = mysql.connector.connect(
-            host=MYSQL_HOST,
-            user=MYSQL_USER,
-            passwd=MYSQL_PASSWORD,
+            host=host,
+            user=user,
+            passwd=password,
             database="radius",
             *additional_args
         )

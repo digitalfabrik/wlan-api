@@ -1,8 +1,10 @@
 from flask import Blueprint, jsonify, make_response, request
+from flask import current_app
 
 from wlan_api.generate import generate_vouchers
 
 shop = Blueprint('shop', __name__)
+
 
 # https://pythonise.com/series/learning-flask/working-with-json-in-flask
 
@@ -37,7 +39,10 @@ def example2():
 @shop.route("/vouchers", methods=["POST"])
 def vouchers():
     if request.is_json:
-        vouchers = generate_vouchers(10, 100)
+        voucher_config = current_app.config['VOUCHER']
+        vouchers = generate_vouchers(10, 100, voucher_config['key'],
+                                     voucher_config['alphabet'],
+                                     voucher_config['length'])
         res = make_response(jsonify(vouchers), 200)
 
         return res

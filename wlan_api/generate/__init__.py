@@ -1,14 +1,10 @@
-import os
+import base64
 import random
 import hmac
 
-alphabet = "2345678ABCDEFGHKLMNPQRSTUVWXYZ"
-length = 16
-key = os.urandom(64)  # key is assumed to stay the same
 
-
-def generate_vouchers(roll, count):
-    mac = hmac.new(key, roll.to_bytes(2, byteorder='little'), "SHA256")
+def generate_vouchers(roll, count, key, alphabet, length):
+    mac = hmac.new(base64.b64decode(key), roll.to_bytes(2, byteorder='little'), "SHA256")
     random.seed(mac.digest())
 
     vouchers = []

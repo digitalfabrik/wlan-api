@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask import request, send_file, render_template, flash, redirect, url_for
 from io import BytesIO
 
@@ -41,7 +41,10 @@ def pdf_generate():
         flash("Error: Please provide an Ads file!")
         return redirect(url_for('vpg.home'))
 
-    vouchers = generate_vouchers(roll, count)
+    voucher_config = current_app.config['VOUCHER']
+    vouchers = generate_vouchers(roll, count, voucher_config['key'],
+                                 voucher_config['alphabet'],
+                                 voucher_config['length'])
     voucher_buffer, voucher_count = create_pdf_buffer(vouchers)
 
     if voucher_buffer is None:
@@ -64,8 +67,11 @@ def pdf_generate():
 def activate_step():
     roll = int(request.form['roll'])
     count = int(request.form['count'])
-    vouchers = generate_vouchers(roll, count)
+    voucher_config = current_app.config['VOUCHER']
+    vouchers = generate_vouchers(roll, count, voucher_config['key'],
+                                 voucher_config['alphabet'],
+                                 voucher_config['length'])
 
-    flash(insert_vouchers_into_database(vouchers))
+    flash(insert_vouchers_into_database(vouchers, current_app.config['MYSQL']))
 
     return render_template('activation/step.html')
