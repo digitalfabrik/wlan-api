@@ -8,7 +8,7 @@ import pathlib
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask("wlan-api")
 
     pathlib.Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
