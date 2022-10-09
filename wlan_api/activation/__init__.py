@@ -42,6 +42,7 @@ def insert_vouchers_into_database(vouchers, mysql_config, voucher_config):
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             message = "Database does not exist"
         else:
+            print(err)
             message = "Something went wrong"
     finally:
         if connection is not None and connection.is_connected():
