@@ -14,6 +14,8 @@ def create_app():
 
     config_file = app.instance_path + "/config.yml"
 
+    print("Config: " + config_file)
+
     if not pathlib.Path(config_file).exists():
         raise Exception("Unable to find config")
 
