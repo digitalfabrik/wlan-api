@@ -23,9 +23,9 @@ def pdf_step():
     return render_template('pdf/step.html', roll=roll, count=count)
 
 
-def create_pdf_buffer(vouchers):
+def create_pdf_buffer(vouchers, validity_days):
     voucher_buffer = BytesIO()
-    report = VoucherPrint(voucher_buffer, vouchers)
+    report = VoucherPrint(voucher_buffer, vouchers, validity_days)
     report.print_vouchers()
     voucher_buffer.seek(0)
     return voucher_buffer, len(vouchers)
@@ -45,7 +45,7 @@ def pdf_generate():
     vouchers = generate_vouchers(roll, count, voucher_config['key'],
                                  voucher_config['alphabet'],
                                  voucher_config['length'])
-    voucher_buffer, voucher_count = create_pdf_buffer(vouchers)
+    voucher_buffer, voucher_count = create_pdf_buffer(vouchers, voucher_config['validity_days'])
 
     if voucher_buffer is None:
         flash("Error: Failed to generate pdf!")
@@ -60,7 +60,7 @@ def pdf_generate():
     return send_file(BytesIO(final_pdf),
                      mimetype='application/pdf',
                      as_attachment=True,
-                     attachment_filename="vouchers_tatdf_roll%s.csv.pdf" % roll)
+                     download_name="vouchers_tatdf_roll%s.csv.pdf" % roll)
 
 
 @vpg.route('/activation/step', methods=['POST'])
@@ -72,6 +72,6 @@ def activate_step():
                                  voucher_config['alphabet'],
                                  voucher_config['length'])
 
-    flash(insert_vouchers_into_database(vouchers, current_app.config['MYSQL']))
+    flash(insert_vouchers_into_database(vouchers, current_app.config['MYSQL'], voucher_config))
 
     return render_template('activation/step.html')

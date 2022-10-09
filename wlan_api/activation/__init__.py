@@ -2,7 +2,7 @@ import mysql
 from mysql.connector import errorcode
 
 
-def insert_vouchers_into_database(vouchers, mysql_config):
+def insert_vouchers_into_database(vouchers, mysql_config, voucher_config):
     host = mysql_config['host']
     user = mysql_config['user']
     password = mysql_config['password']
@@ -29,7 +29,7 @@ def insert_vouchers_into_database(vouchers, mysql_config):
         connection.autocommit = False
         cursor = connection.cursor()
 
-        if activate_vouchers(cursor, vouchers):
+        if activate_vouchers(cursor, vouchers, voucher_config['validity_days']):
             connection.commit()
             message = "Successfully activated vouchers"
         else:
@@ -53,7 +53,7 @@ def insert_vouchers_into_database(vouchers, mysql_config):
     return message
 
 
-def activate_vouchers(cursor, vouchers):
+def activate_vouchers(cursor, vouchers, validity_days):
     for voucher in vouchers:
         cursor.execute(
             "SELECT username FROM radcheck WHERE radcheck.username = %s;",
@@ -63,7 +63,7 @@ def activate_vouchers(cursor, vouchers):
         if len(cursor.fetchall()) == 0:
             cursor.execute(
                 "INSERT INTO radcheck (username, attribute, op, value) VALUES (%s,'Max-All-Session',':=', %s);",
-                (voucher, str(36 * 24 * 60 * 60))
+                (voucher, str(validity_days * 24 * 60 * 60))
             )
 
             cursor.execute(

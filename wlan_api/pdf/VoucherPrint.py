@@ -11,9 +11,10 @@ from reportlab.lib.enums import TA_RIGHT
 
 class VoucherPrint:
 
-    def __init__(self, buffer, vouchers):
+    def __init__(self, buffer, vouchers, validity_days):
         self.buffer = buffer
         self.vouchers = vouchers
+        self.validity_days = validity_days
         self.pagesize = A5
         self.width, self.height = self.pagesize
 
@@ -99,8 +100,8 @@ class VoucherPrint:
             self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
-            elements.append(Paragraph('''
-                <b>Dieser Voucher ist nach der ersten Aktivierung 36 Tage gültig</b>
+            elements.append(Paragraph(f'''
+                <b>Dieser Voucher ist nach der ersten Aktivierung {self.validity_days} Tage gültig</b>
             ''', styles["Text"]))
 
             elements.append(Spacer(0, 5 * mm))
