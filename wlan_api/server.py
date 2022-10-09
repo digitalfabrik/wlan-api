@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, redirect
 
 from wlan_api.vpg import vpg
 import yaml
@@ -21,5 +21,10 @@ def create_app():
 
     app.config.from_file(config_file, load=lambda f: yaml.load(f, Loader=yaml.CLoader))
 
+    @app.route('/', methods=['GET'])
+    def home():
+        return redirect('/vpg')
+
     app.register_blueprint(vpg, url_prefix='/vpg')
+
     return app
