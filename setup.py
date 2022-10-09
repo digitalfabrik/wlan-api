@@ -9,7 +9,7 @@ setup(
     author='max',
     author_email='',
     description='',
-    install_requires=['reportlab==3.6.11', 'Flask==2.2.2', "mysql-connector-python>=8.0.30", "gunicorn==20.1.0",
+    install_requires=['reportlab==3.6.8', 'Flask==2.2.2', "mysql-connector-python>=8.0.30", "gunicorn==20.1.0",
                       "pyyaml==6.0"],
     scripts=['scripts/generate.py'],
     include_package_data=True,
