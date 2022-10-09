@@ -13,4 +13,7 @@ setup(
                       "pyyaml>=6.0"],
     scripts=['scripts/generate.py'],
     include_package_data=True,
+    package_data={
+        'wlan-api': ['vpg/templates/*.html', 'vpg/templates/**/*.html']
+    },
 )
