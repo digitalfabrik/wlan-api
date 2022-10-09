@@ -23,7 +23,7 @@ def insert_vouchers_into_database(vouchers, mysql_config, voucher_config):
             user=user,
             passwd=password,
             database="radius",
-            *additional_args
+            **additional_args
         )
 
         connection.autocommit = False
