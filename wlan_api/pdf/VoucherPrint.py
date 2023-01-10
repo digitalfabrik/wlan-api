@@ -58,7 +58,7 @@ class VoucherPrint:
 
         # Footer
         canvas.drawRightString(doc.width + doc.rightMargin, 10 * mm,
-                               'Falls Probleme auftreten, schreiben Sie eine E-Mail an wifi@tuerantuer.de')
+                               'Falls Probleme auftreten, schreiben Sie eine E-Mail an wifi@tuerantuer.org')
 
         # Release the canvas
         canvas.restoreState()
