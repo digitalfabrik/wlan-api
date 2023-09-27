@@ -1,10 +1,10 @@
 import os
+import pathlib
 
+import yaml
 from flask import Flask, redirect
 
 from wlan_api.vpg import vpg
-import yaml
-import pathlib
 
 
 def create_app():
