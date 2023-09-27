@@ -1,3 +1,5 @@
+import qrcode
+
 from reportlab.lib.pagesizes import A5
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
@@ -64,6 +66,10 @@ class VoucherPrint:
         canvas.restoreState()
 
     def print_table(self, elements, voucher):
+        # Generate QR Code
+        img = qrcode.make(voucher)
+        img.save('assets/images/qrcode.jpg')
+        qrcode = Image('assets/images/qrcode.jpg')
         table = Table([('Voucher Code', voucher)],
                       colWidths=55 * mm, rowHeights=10 * mm)
         table.setStyle(TableStyle(
@@ -91,6 +97,7 @@ class VoucherPrint:
         elements = []
 
         for i, voucher in enumerate(self.vouchers):
+
             #qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org/?voucher=' + voucher)
             #elements.append(qrcode)
 
