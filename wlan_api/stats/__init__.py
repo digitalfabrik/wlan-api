@@ -36,7 +36,7 @@ def home():
 
         cursor = connection.cursor()
 
-        cursor.execute('WITH USER_FIRST AS (   SELECT username, min(acctstarttime) as acctstarttime   FROM radacct   GROUP BY username ) SELECT   EXTRACT(YEAR FROM acctstarttime) AS year,   EXTRACT(MONTH FROM acctstarttime) AS month,   COUNT(username) AS user_count FROM   USER_FIRST GROUP BY   EXTRACT(YEAR FROM acctstarttime),   EXTRACT(MONTH FROM acctstarttime) ORDER BY year,   month;').fetchall()
+        cursor.execute('WITH USER_FIRST AS (   SELECT username, min(acctstarttime) as acctstarttime   FROM radacct   GROUP BY username ) SELECT   EXTRACT(YEAR FROM acctstarttime) AS year,   EXTRACT(MONTH FROM acctstarttime) AS month,   COUNT(username) AS user_count FROM   USER_FIRST GROUP BY   EXTRACT(YEAR FROM acctstarttime),   EXTRACT(MONTH FROM acctstarttime) ORDER BY year,   month;')
         output = cursor.fetchall()
 
     except mysql.connector.Error as err:
