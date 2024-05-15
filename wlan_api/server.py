@@ -3,6 +3,7 @@ import os
 from flask import Flask, redirect
 
 from wlan_api.vpg import vpg
+from wlan_api.stats import stats
 import yaml
 import pathlib
 
@@ -26,5 +27,5 @@ def create_app():
         return redirect('/vpg')
 
     app.register_blueprint(vpg, url_prefix='/vpg')
-
+    app.register_blueprint(stats, url_prefix='/stats')
     return app
