@@ -1,10 +1,13 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, make_response
 from flask import request, send_file, render_template, flash, redirect, url_for
 from io import BytesIO
+import mysql
+from mysql.connector import errorcode
+
 
 stats = Blueprint('stats', __name__, static_folder='static', template_folder='templates')
 
-@vpg.route('/', methods=['GET'])
+@stats.route('/', methods=['GET'])
 def home():
     mysql_config = current_app.config['MYSQL']
     host = mysql_config['host']
@@ -31,12 +34,10 @@ def home():
             **additional_args
         )
 
-        connection.autocommit = False
         cursor = connection.cursor()
 
-        output = cursor.execute('WITH USER_FIRST AS (   SELECT username, min(acctstarttime) as acctstarttime   FROM radacct   GROUP BY username ) SELECT   EXTRACT(YEAR FROM acctstarttime) AS year,   EXTRACT(MONTH FROM acctstarttime) AS month,   COUNT(username) AS user_count FROM   USER_FIRST GROUP BY   EXTRACT(YEAR FROM acctstarttime),   EXTRACT(MONTH FROM acctstarttime) ORDER BY year,   month;')
-
-        connection.commit()
+        cursor.execute('WITH USER_FIRST AS (   SELECT username, min(acctstarttime) as acctstarttime   FROM radacct   GROUP BY username ) SELECT   EXTRACT(YEAR FROM acctstarttime) AS year,   EXTRACT(MONTH FROM acctstarttime) AS month,   COUNT(username) AS user_count FROM   USER_FIRST GROUP BY   EXTRACT(YEAR FROM acctstarttime),   EXTRACT(MONTH FROM acctstarttime) ORDER BY year,   month;').fetchall()
+        output = cursor.fetchall()
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -46,6 +47,7 @@ def home():
         else:
             print(err)
             message = "Something went wrong"
+            raise err
     finally:
         if connection is not None and connection.is_connected():
             connection.close()
@@ -53,5 +55,13 @@ def home():
             if cursor is not None:
                 cursor.close()
 
-    return if message is not None message else output
+    text = ""
+
+    for year, month, count in output:
+        text += f"{year}, {month} - {count}\n"
+
+    response = make_response(text, 200)
+    response.mimetype = "text/plain"
+
+    return message if message is not None else response
 
