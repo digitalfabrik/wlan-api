@@ -1,5 +1,3 @@
-import os
-
 from flask import Flask, redirect
 
 from wlan_api.vpg import vpg

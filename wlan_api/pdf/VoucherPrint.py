@@ -1,5 +1,6 @@
 from reportlab.lib.pagesizes import A5
 from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Image, ListFlowable, ListItem, Spacer, Table, TableStyle
+from wlan_api.pdf.QRFlowable import QRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import black
@@ -52,9 +53,9 @@ class VoucherPrint:
         styles = getSampleStyleSheet()
         canvas.setFont("DejaVu Sans", 7)
 
-        im = Image('assets/images/TaT_DF_LOGO.jpeg')
-        im._restrictSize(1000 * mm, 30 * mm)
-        im.drawOn(canvas, doc.leftMargin, doc.height - 20 * mm)
+        im = Image('assets/images/TaT-Logo.png')
+        im._restrictSize(1000 * mm, 15 * mm)
+        im.drawOn(canvas, doc.leftMargin + 5 * mm, doc.height - 20 * mm)
 
         # Footer
         canvas.drawRightString(doc.width + doc.rightMargin, 10 * mm,
@@ -91,54 +92,36 @@ class VoucherPrint:
         elements = []
 
         for i, voucher in enumerate(self.vouchers):
-            #qrcode = QRFlowable('http://redirect.wlan.tuerantuer.org/?voucher=' + voucher)
-            #elements.append(qrcode)
+            elements.append(Spacer(0, 10 * mm))
+            elements.append(QRFlowable(voucher))
 
-            #elements.append(Paragraph('1. Deaktiviere deine mobilen Daten  2. Scannen  3. Du wirst eingeloggt!', styles['Voucher_Subtitle']))
-
-            elements.append(Spacer(0, 40 * mm))
             self.print_table(elements, voucher)
             elements.append(Spacer(0, 10 * mm))
 
-            elements.append(Paragraph(f'''
-                <b>Dieser Voucher ist nach der ersten Aktivierung {self.validity_days} Tage gültig</b>
-            ''', styles["Text"]))
-
-            elements.append(Spacer(0, 5 * mm))
+            elements.append(Paragraph('<b>So verbinden Sie sich mit dem Internet:</b>', styles["Text"]))
+            elements.append(Spacer(0, 3 * mm))
             elements.append(ListFlowable(
                 [
                     ListItem(Paragraph(
-                        'Verbinden Sie sich mit dem WLAN-Netzwerk (z.B. "net2otto", "net2wind"...)', styles['Text']), value='circle'),
+                        'Mit WLAN verbinden (z.B. "net2otto", "net2wind")', styles['Text']), value='circle'),
                     ListItem(Paragraph(
-                        'Öffnen Sie ihren Webbrowser (Firefox, Chrome, Internet Explorer...)', styles['Text']), value='circle'),
-                    ListItem(
-                        Paragraph('Öffnen Sie eine beliebige Website', styles['Text']), value='circle'), 
+                        'Browser öffnen und eine beliebige Website aufrufen', styles['Text']), value='circle'),
                     ListItem(Paragraph(
-                        'Geben Sie ihren persönlichen Voucher Code ein (Groß-/Kleinschreibung ist wichtig)', styles['Text']), value='circle'),
-                    ListItem(Paragraph('Klicken Sie auf "Submit"',
-                                       styles['Text']), value='circle'),
-                    ListItem(Paragraph(
-                        'Die Internetverbindung funktioniert jetzt.', styles['Text']), value='circle')
+                        'Voucher Code eingeben (Groß-/Kleinschreibung beachten) und auf „Submit" klicken', styles['Text']), value='circle'),
                 ],
                 style=styles['list_default']
             ))
 
-            elements.append(Spacer(0, 10 * mm))
-            elements.append(Paragraph('''
-                <b>Geben Sie den Voucher Code nicht weiter! Sie können das Internet 
-                nicht mehr normal nutzen, falls jemand anderes Ihren Voucher Code kennt!</b>
-            ''', styles["Text"]))
-            elements.append(Spacer(0,  5 * mm))
-            elements.append(Paragraph('''
-                Sie können den Voucher Code für mehrere Geräte benutzen, allerdings nur für
-                maximal ein Gerät gleichzeitig.
-            ''', styles["Text"]))
-            elements.append(Spacer(0,  5 * mm))
-            elements.append(Paragraph('''
-                <b>Erinnern Sie sich immer daran</b>, dass der Internetverkehr vom
-                Internetanbieter protokolliert wird. Sie sind verantwortlich für jeglichen
-                Missbrauch. Verstöße werden nach deutschem Gesetz verfolgt.
-            ''', styles["Text"]))
+            elements.append(Spacer(0, 5 * mm))
+            elements.append(Paragraph(f'<b>Gültigkeit:</b> Dieser Voucher ist <b>{self.validity_days}</b> Tage gültig ab der ersten Nutzung.', styles["Text"]))
+            elements.append(Spacer(0, 3 * mm))
+            elements.append(Paragraph('<b>Sicherheit:</b> Voucher Code nicht weitergeben – sonst kann jemand anderes Ihr Internet nutzen.', styles["Text"]))
+            elements.append(Spacer(0, 3 * mm))
+            elements.append(Paragraph('<b>Mehrere Geräte:</b> Der Code funktioniert auf mehreren Geräten, aber immer nur einem gleichzeitig.', styles["Text"]))
+            elements.append(Spacer(0, 3 * mm))
+            elements.append(Paragraph('<b>Android 10+:</b> Zufällige MAC-Adresse für dieses WLAN ausschalten, sonst kann es beim Wiederverbinden mehrere Stunden dauern, bis das Internet wieder funktioniert.', styles["Text"]))
+            elements.append(Spacer(0, 3 * mm))
+            elements.append(Paragraph('<b>Rechtliches:</b> Der Internetverkehr wird protokolliert. Sie sind verantwortlich für die Nutzung.', styles["Text"]))
             elements.append(PageBreak())
 
         doc.build(elements, onFirstPage=self._header_footer,
