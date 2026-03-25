@@ -3,7 +3,7 @@ import csv
 import sys
 import argparse
 from io import BytesIO
-from wlan_api.generate import VoucherPrint
+from wlan_api.pdf import VoucherPrint
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generates vouchers.')
@@ -11,6 +11,7 @@ if __name__ == '__main__':
                         default=sys.stdin)
     parser.add_argument('outfile', nargs='?', type=argparse.FileType('wb'),
                         default=sys.stdout)
+    parser.add_argument('--validity-days', type=int, default=40)
     args = parser.parse_args()
 
     vouchers = []
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 
     buffer = BytesIO()
 
-    report = VoucherPrint(buffer, vouchers)
+    report = VoucherPrint(buffer, vouchers, args.validity_days)
     pdf = report.print_vouchers()
     buffer.seek(0)
 
