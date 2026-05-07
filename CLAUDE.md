@@ -37,7 +37,7 @@ Key fields under `VOUCHER`: `alphabet`, `length`, `key` (base64-encoded HMAC key
 
 ## Deployment
 
-Das Deployment läuft über [Salt](https://saltproject.io). Die Salt-Konfiguration liegt in einem separaten Repository unter `/home/aniel_ehne/salt` (nicht in diesem Repo). Die relevanten Salt-States und Pillars für WLAN befinden sich dort unter:
+Das Deployment läuft über [Salt](https://saltproject.io). Die Salt-Konfiguration liegt in [https://git.tuerantuer.org/DF/salt](https://git.tuerantuer.org/DF/sal). Die relevanten Salt-States und Pillars für WLAN befinden sich dort unter:
 
 - `states/wlan-captiveportal/` — Nginx-Konfiguration für das Captive Portal
 - `states/wlan-freeradius/` — FreeRADIUS + MariaDB Installation
