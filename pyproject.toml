@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wlan-api"
+version = "0.2"
+description = "Voucher PDF generation and activation for the tuerantuer WLAN"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13"
+authors = [{ name = "max" }]
+dependencies = [
+    "reportlab>=3.6.8",
+    "Flask>=2.0.0",
+    # Pinned: newer connector regressed utf8 handling
+    # https://stackoverflow.com/questions/73244027/character-set-utf8-unsupported-in-python-mysql-connector
+    "mysql-connector-python<=8.0.29",
+    "gunicorn>=23.0.0",
+    "pyyaml>=6.0",
+]
+
+[tool.setuptools]
+include-package-data = true
+script-files = ["scripts/generate.py"]
+
+[tool.setuptools.packages.find]
+include = ["wlan_api*"]
+
+[tool.setuptools.package-data]
+wlan_api = [
+    "vpg/templates/*.html",
+    "vpg/templates/**/*.html",
+    "vpg/static/*",
+]
