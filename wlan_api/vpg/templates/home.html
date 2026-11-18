@@ -8,7 +8,14 @@
     <form action="pdf/step" method="POST">
         <div>
             <label for="roll">Roll</label>
-            <input name="roll" id="roll" value="1" type="number">
+            <input name="roll" id="roll" value="{{ next_roll }}" min="0" max="65535" type="number" required>
+            <div class="hint">
+                {% if last_roll is not none %}
+                Last generated roll: {{ last_roll }}. Only change the roll to reprint an existing one.
+                {% else %}
+                No roll has been generated yet.
+                {% endif %}
+            </div>
         </div>
         <div>
             <label for="count">Count </label>

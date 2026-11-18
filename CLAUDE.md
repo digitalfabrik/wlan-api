@@ -33,7 +33,11 @@ The app is a Flask server with two blueprints:
 
 ### Config (`config.yml` / `instance/config.yml`)
 
-Key fields under `VOUCHER`: `alphabet`, `length`, `key` (base64-encoded HMAC key), `validity_days`.
+Key fields under `VOUCHER`: `alphabet`, `length`, `key` (base64-encoded HMAC key), `validity_days`, `start_roll`.
+
+### Roll numbers
+
+`wlan_api/roll/__init__.py` stores the highest roll for which a PDF was successfully generated in `instance/last_roll`. The home page pre-fills the next roll (`last_roll + 1`, or `start_roll` if no state exists yet). Lower rolls can still be entered for reprints; the step page warns about that and the stored value is never lowered.
 
 ## Deployment
 

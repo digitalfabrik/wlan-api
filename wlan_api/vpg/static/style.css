@@ -52,6 +52,19 @@ input[type=submit] {
     margin: 50px auto;
 }
 
+.hint {
+    font-size: 14px;
+    color: #666;
+}
+
+.warning {
+    background-color: #fff3cd;
+    color: #664d03;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border-radius: 4px;
+}
+
 .flash {
     width: 100%;
     background-color: #9f0808;

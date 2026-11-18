@@ -3,8 +3,14 @@
 {% block content %}
 
 <h1>
-    Download PDF
+    Download PDF for roll {{ roll }}
 </h1>
+{% if roll_used %}
+<div class="warning">
+    Roll {{ roll }} has already been generated. Only continue if you want to reprint it,
+    the vouchers will be identical to the existing ones.
+</div>
+{% endif %}
 <div class="section">
     <div>
         Please upload the PDF to the Google Drive! The download starts after about 20 seconds.
