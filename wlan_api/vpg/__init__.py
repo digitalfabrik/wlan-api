@@ -5,6 +5,7 @@ from io import BytesIO
 from wlan_api.activation import insert_vouchers_into_database
 from wlan_api.generate import generate_vouchers
 from wlan_api.pdf import VoucherPrint
+from wlan_api.roll import RollStore
 
 from wlan_api.pdf.pdfjam import merge_final_pdf
 
@@ -44,9 +45,15 @@ def _reject_invalid_input(err):
     return redirect(url_for('vpg.home'))
 
 
+def _roll_store():
+    return RollStore(current_app.instance_path,
+                     current_app.config['VOUCHER'].get('start_roll', 1))
+
+
 @vpg.route('/', methods=['GET'])
 def home():
-    return render_template('home.html')
+    store = _roll_store()
+    return render_template('home.html', next_roll=store.next_roll(), last_roll=store.last_roll())
 
 
 @vpg.route('/pdf/step', methods=['POST'])
@@ -55,7 +62,8 @@ def pdf_step():
         roll, count = _parse_roll_count(request.form)
     except ValueError as err:
         return _reject_invalid_input(err)
-    return render_template('pdf/step.html', roll=roll, count=count)
+    return render_template('pdf/step.html', roll=roll, count=count,
+                           roll_used=_roll_store().is_used(roll))
 
 
 def create_pdf_buffer(vouchers, validity_days):
@@ -94,6 +102,8 @@ def pdf_generate():
     if final_pdf is None:
         flash("Error: Failed to shuffle ads!")
         return redirect(url_for('vpg.home'))
+
+    _roll_store().record(roll)
 
     return send_file(BytesIO(final_pdf),
                      mimetype='application/pdf',
